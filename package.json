@@ -1,0 +1,15 @@
+{
+  "name": "node-master",
+  "version": "1.0.0",
+  "description": "A mini project to extend NODE knowledge beyond the basics no frameworks",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "NODE",
+    "MASTER"
+  ],
+  "author": "Aaron Biliyok",
+  "license": "ISC"
+}
