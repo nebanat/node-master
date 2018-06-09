@@ -1,9 +1,10 @@
 const http = require('http')
 const url = require('url')
 const StringDecoder = require('string_decoder').StringDecoder
-const helpers = require('./helpers')
+const helpers = require('./lib/helpers')
 const router = require('./router')
-const handlers = require('./handlers')
+const handlers = require('./lib/handlers')
+const config = require('./config')
 
 /**
  * @description return the URL path, trimmedPath and querystrings
@@ -73,6 +74,6 @@ const server = http.createServer((req, res) => {
     unifiedServer(req, res)
 })
 
-server.listen(8000, () => {
-  console.log('Server is listening on port 8000')
+server.listen(config.port, () => {
+  console.log(`${config.envName} server listening on port ${config.port}`)
 })
