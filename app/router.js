@@ -1,4 +1,4 @@
-const handlers = require('./handlers')
+const handlers = require('./lib/handlers')
 
 const router = {
   'ping': handlers.ping,
