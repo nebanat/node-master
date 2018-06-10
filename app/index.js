@@ -1,11 +1,17 @@
 const http = require('http')
+const https = require('https')
 const url = require('url')
+const fs = require('fs')
 const StringDecoder = require('string_decoder').StringDecoder
 const helpers = require('./lib/helpers')
 const router = require('./router')
 const handlers = require('./lib/handlers')
 const config = require('./config')
 
+const httpsServerOptions = {
+  'key': fs.readFileSync('./https/key.pem'),
+  'cert': fs.readFileSync('./https/cert.pem')
+}
 /**
  * @description return the URL path, trimmedPath and querystrings
  * @param {req} req 
@@ -70,10 +76,22 @@ const unifiedServer = (req, res) => {
 /**
  * Creates a http server instance
  */
-const server = http.createServer((req, res) => {
+const httpServer = http.createServer((req, res) => {
     unifiedServer(req, res)
 })
 
-server.listen(config.port, () => {
-  console.log(`${config.envName} server listening on port ${config.port}`)
+/**
+ * creates a https server instance
+ */
+
+ const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
+   unifiedServer(req, res)
+ })
+
+httpServer.listen(config.httpPort, () => {
+  console.log(`${config.envName} server listening on port ${config.httpPort}`)
+})
+
+httpsServer.listen(config.httpsPort, () => {
+  console.log(`secured ${config.envName} server listening on port ${config.httpsPort}`)
 })
