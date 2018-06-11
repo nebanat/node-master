@@ -104,7 +104,7 @@ UserService.put = async (data, callback) => {
  */
 UserService.delete = async (data, callback) => {
   const phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.length == 10 ? data.queryStringObject.phone.trim() : false
-
+  
   if(phone) {
     try {
       const userDeletion = await fileOps.delete('users',phone)
@@ -115,10 +115,9 @@ UserService.delete = async (data, callback) => {
     }
   }
   else {
-    callback(400, {'Error': 'Missing required field'})
+    callback(400, {'Error': 'Missing required field or header token'})
   }
  
-  
 }
 
 module.exports = UserService
