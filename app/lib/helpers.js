@@ -1,5 +1,6 @@
 const crypto = require('crypto') 
 const config = require('../config')
+const fileOps = require('./data')
 
 let helpers = {}
 
@@ -13,7 +14,7 @@ helpers.hash = (str) => {
   }
 }
 
-helpers.parseJSONToObject = (str) => {9
+helpers.parseJSONToObject = (str) => {
   try {
     const obj = JSON.parse(str)
     return obj
@@ -23,5 +24,23 @@ helpers.parseJSONToObject = (str) => {9
   }
 }
 
+helpers.createRandomString = (strLength) => {
+  strLength = typeof(strLength) == 'number' && strLength > 0 ? strLength : false
+  if(strLength) {
+    const possibleCharacters = 'abcdefghijklmnopqrstuvwxyz0123456789'
+
+    let randomStr = ''
+
+    for(i = 1; i <= strLength; i++) {
+      let randomCharacter = possibleCharacters.charAt(Math.floor(Math.random() * possibleCharacters.length))
+      randomStr += randomCharacter
+    }
+
+    return randomStr
+  }
+  else {
+    return false
+  }
+}
 
 module.exports = helpers
