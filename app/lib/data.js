@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const helpers = require('../lib/helpers')
 
 const fileOps = {}
 
@@ -17,7 +18,7 @@ fileOps.createORFail = (dir, file) => {
         resolve(fileDescriptor)
       }
       else {
-        return reject('could not create file, it already exist')
+        return reject('The file or resource already exist')
       }
     })
   })
@@ -76,7 +77,7 @@ fileOps.writeToFile = (fileDescriptor, data) => {
 fileOps.create = async (dir, file, data) => {
     try {
       const fileDescriptor = await fileOps.createORFail(dir, file)
-      const fileWritting = await fileOps.writeToFile(fileDescriptor,data)
+      const fileWriting = await fileOps.writeToFile(fileDescriptor,data)
       return Promise.resolve(true)
     }
     catch(err) {
@@ -89,13 +90,14 @@ fileOps.create = async (dir, file, data) => {
  * @param { string } file  - file to read from 
  */
 fileOps.read = (dir, file) => {
-  return new Promise((reject, resolve) => {
-    fs.readFile(`${fileOps.baseDir}${dir}/${file}.json`, 'utf-8', (err, data) => {
+  return new Promise((resolve, reject) => {
+    fs.readFile(`${fileOps.baseDir}${dir}/${file}.json`, 'utf8', (err, data) => {
       if(!err && data) {
-        resolve(data)
-      } 
+        const parsedData = helpers.parseJSONToObject(data)
+        resolve(parsedData)
+      }
       else {
-        return reject(err)
+        return reject('file does not exist')
       }
     })
   })
@@ -127,8 +129,8 @@ fileOps.update = async (dir, file, data) => {
 
 /**
  * @description - deletes a file/resource
- * @param {*} dir - directory containing file/resource to be deleted
- * @param {*} file - file/resource to be deleted
+ * @param { string } dir - directory containing file/resource to be deleted
+ * @param { string } file - file/resource to be deleted
  */
 fileOps.delete = (dir,file) => {
   return new Promise((resolve, reject) => {
@@ -137,7 +139,7 @@ fileOps.delete = (dir,file) => {
         resolve(true)
       }
       else {
-        return reject('file specified does not exist')
+        return reject('file or resource specified does not exist')
        }
     })
   })
