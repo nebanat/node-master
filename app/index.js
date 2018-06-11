@@ -38,7 +38,8 @@ const getURLObject = (req) => {
  */
 const unifiedServer = (req, res) => {
   const urlObject = getURLObject(req)
-  const { method, headers } = req
+  const method = req.method.toLowerCase()
+  const headers = req.headers
   const decoder = new StringDecoder('utf-8')
 
   let buffer = ''
@@ -52,7 +53,7 @@ const unifiedServer = (req, res) => {
 
     const data = {
       ...urlObject, 
-      method, 
+      method,
       headers, 
       'payload': helpers.parseJSONToObject(buffer)
     }

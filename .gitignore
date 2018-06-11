@@ -1,0 +1,4 @@
+/app/https/cert.pem
+/app/https/key.pem
+/app/.data
+/app/config.js
