@@ -1,40 +1,35 @@
 const fileOps = require('../lib/data')
 const helpers = require('../lib/helpers')
+const userSchema = require('../schemas/userSchema')
+const validate = require('validate.js')
 
 let UserService = {}
 
 /**
- * @TODO - check and create directory
  * @description - creates a new user 
  * @param { obj } data - contains request data
  * @param { func } callback 
  */
 UserService.post = async (data, callback) => {
-  const firstName = typeof(data.payload.firstName) == 'string' && data.payload.firstName.trim().length > 0 ? data.payload.firstName.trim() : false
-  const lastName = typeof(data.payload.lastName) == 'string' && data.payload.lastName.trim().length > 0 ? data.payload.lastName.trim() : false
-  const phone = typeof(data.payload.phone) == 'string' && data.payload.phone.trim().length == 10 ? data.payload.phone.trim() : false
-  const password = typeof(data.payload.password) == 'string' && data.payload.password.trim().length > 0 ? data.payload.password.trim() : false
-  const tosAgreement = typeof(data.payload.tosAgreement) == 'boolean' && data.payload.tosAgreement == true  ? true : false
+  const { phone, password } = data.payload
+  const validationError = validate(data.payload, userSchema.create)
 
-  if(firstName && lastName && phone && password && tosAgreement) {
+  if(!validationError) {
     try {
-        const hashedPassword = helpers.hash(password)
-        const userObject = {
-          firstName,
-          lastName,
-          phone,
-          hashedPassword,
-          tosAgreement
-        }
-        const userCreation = await fileOps.create('users', phone, userObject)
-        callback(200)
+        const hashedPassword = helpers.hashPass(password)
+        delete data.payload.password
+        const user = {...data.payload, hashedPassword }
+        const userCreation = await fileOps.create('users', phone, user )
+        delete user.hashedPassword
+        callback(200, { user })
     }
     catch(err) {
         callback(400, {'Error':err })
     }
+
   }
   else {
-    callback(400, {'Error': 'Missing some required fields'})
+    callback(400, {'error': validationError})
   }
 }
 
@@ -44,9 +39,11 @@ UserService.post = async (data, callback) => {
  * @param { func } callback 
  */
 UserService.get = async (data, callback) => {
-  const phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.length == 10 ? data.queryStringObject.phone.trim() : false
+  const { phone } = data.queryStringObject
 
-  if(phone) {
+  const validationError = validate( { phone } , userSchema.phoneValidation)
+
+  if(!validationError) {
     try {
       const userData = await fileOps.read('users', phone)
       delete userData.hashedPassword
@@ -57,67 +54,70 @@ UserService.get = async (data, callback) => {
     }
   }
   else {
-    callback(400, {'Error': 'Missing some required fields '})
+    callback(400, validationError)
   }
-
-
 }
 
 /**
+ * @Todo - study process.nextTick to differ the deletion of new hashedpassword
  * @description - updates a user file or resource
  * @param { json } data - request data containing user details
  * @param { func } callback 
  */
 UserService.put = async (data, callback) => {
-  const phone = typeof(data.payload.phone) == 'string' && data.payload.phone.trim().length == 10 ? data.payload.phone.trim() : false
+  const { phone, firstName, lastName, password } = data.payload
 
-  const firstName = typeof(data.payload.firstName) == 'string' && data.payload.firstName.trim().length > 0 ? data.payload.firstName.trim() : false
-  const lastName = typeof(data.payload.lastName) == 'string' && data.payload.lastName.trim().length > 0 ? data.payload.lastName.trim() : false
-  const password = typeof(data.payload.password) == 'string' && data.payload.password.trim().length > 0 ? data.payload.password.trim() : false
+  const validationError = validate(data.payload, userSchema.put)
 
-  if(phone) {
+  if(!validationError) {
     if(firstName || lastName || password) {
       try {
         const userData = await fileOps.read('users', phone)
-        const hashedPassword = password ? helpers.hash(password) :userData.hashedPassword
+        const hashedPassword = password ? helpers.hashPass(password) :userData.hashedPassword
         delete data.payload.password
         const newUserData = {...userData, ...data.payload, hashedPassword}
         const updatingFile = await fileOps.update('users', phone, newUserData)
-        callback(200, newUserData)
+      //   process.nextTick(() => {
+      //     delete newUserData.hashedPassword
+      //  })
+        callback(201, { newUserData })
       }
       catch(err) {
         callback(400, {'Error': err })
 
       }
+   }
+    else {
+      callback(400, {'Error': 'Please enter some fields to update'})
     }
   }
   else {
-    callback(400, {'Error': 'Missing required fields'})
+    callback(400, validationError)
   }
   
- 
 }
 /**
- * @description - delete a user file or resource 
- * @param { json } data 
+ * @description - deletes a user resource
+ * @param { obj } data 
  * @param { func } callback 
  */
 UserService.delete = async (data, callback) => {
-  const phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.length == 10 ? data.queryStringObject.phone.trim() : false
-  
-  if(phone) {
+  const { phone } = data.queryStringObject
+
+  const validationError = validate( { phone } , userSchema.phoneValidation)
+
+  if(!validationError) {
     try {
       const userDeletion = await fileOps.delete('users',phone)
-      callback(200)
+      callback(200, {'message': 'User successfully deleted'})
     }
     catch(err) {
       callback(500, {'Error': err })
     }
   }
   else {
-    callback(400, {'Error': 'Missing required field or header token'})
+    callback(400, validationError)
   }
- 
 }
 
 module.exports = UserService

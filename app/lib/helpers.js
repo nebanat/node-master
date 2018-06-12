@@ -1,10 +1,9 @@
 const crypto = require('crypto') 
 const config = require('../config')
-const fileOps = require('./data')
 
 let helpers = {}
 
-helpers.hash = (str) => {
+helpers.hashPass = (str) => {
   if(typeof(str) == 'string' && str.length > 0) {
     const hashStr = crypto.createHmac('sha256', config.hashingSecret).update(str).digest('hex')
     return hashStr
@@ -14,15 +13,6 @@ helpers.hash = (str) => {
   }
 }
 
-helpers.parseJSONToObject = (str) => {
-  try {
-    const obj = JSON.parse(str)
-    return obj
-  }
-  catch(e) {
-    return {}
-  }
-}
 
 helpers.createRandomString = (strLength) => {
   strLength = typeof(strLength) == 'number' && strLength > 0 ? strLength : false
@@ -42,5 +32,16 @@ helpers.createRandomString = (strLength) => {
     return false
   }
 }
+
+helpers.parseJSONToObject = (str) => {
+  try {
+    const obj = JSON.parse(str)
+    return obj
+  }
+  catch(e) {
+    return {}
+  }
+}
+
 
 module.exports = helpers

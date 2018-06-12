@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const helpers = require('../lib/helpers')
+const helpers = require('./helpers')
 
 const fileOps = {}
 
