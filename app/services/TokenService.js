@@ -15,7 +15,8 @@ TokenService.post = async (data, callback) => {
   const validationErrors = validate(data.payload, tokenSchema.create)
   if(!validationErrors) {
     try {
-        const userData  = await fileOps.read('users', phone)
+        const stringData  = await fileOps.read('users', phone)
+        const userData = helpers.parsedJSONToObject(stringData)
         const hashedPassword = helpers.hashPass(password)
 
         if(hashedPassword == userData.hashedPassword) {

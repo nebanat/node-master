@@ -38,20 +38,29 @@ UserService.post = async (data, callback) => {
  * @param { obj } data - contains request details
  * @param { func } callback 
  */
-UserService.get = async (data, callback) => {
+UserService.get = (data, callback) => {
   const { phone } = data.queryStringObject
-
-  const validationError = validate( { phone } , userSchema.phoneValidation)
+  const { token } = data.headers
+  const validationError = validate( { phone, token } , userSchema.get)
 
   if(!validationError) {
-    try {
-      const userData = await fileOps.read('users', phone)
-      delete userData.hashedPassword
-      callback(200, userData)
-    }
-    catch(err) {
-      callback(400, { 'Error': err })
-    }
+    helpers.verifyToken(token, phone, async (tokenIsValid) => {
+      if(tokenIsValid) {
+        try {
+          const stringData = await fileOps.read('users', phone)
+          const userData = helpers.parsedJSONToObject(stringData)
+          delete userData.hashedPassword
+          callback(200, userData)
+        }
+        catch(err) {
+          callback(400, { 'Error': err })
+        }
+      }
+      else {
+        callback(403, {'Error': 'Invalid or expired token. please provide a valid token'})
+      }
+    })
+    
   }
   else {
     callback(400, validationError)
@@ -66,26 +75,37 @@ UserService.get = async (data, callback) => {
  */
 UserService.put = async (data, callback) => {
   const { phone, firstName, lastName, password } = data.payload
+  const { token } = data.headers
 
-  const validationError = validate(data.payload, userSchema.put)
+  const validationError = validate({...data.payload,token}, userSchema.put)
 
   if(!validationError) {
     if(firstName || lastName || password) {
-      try {
-        const userData = await fileOps.read('users', phone)
-        const hashedPassword = password ? helpers.hashPass(password) :userData.hashedPassword
-        delete data.payload.password
-        const newUserData = {...userData, ...data.payload, hashedPassword}
-        const updatingFile = await fileOps.update('users', phone, newUserData)
-      //   process.nextTick(() => {
-      //     delete newUserData.hashedPassword
-      //  })
-        callback(201, { newUserData })
-      }
-      catch(err) {
-        callback(400, {'Error': err })
+      helpers.verifyToken(token,phone, async (tokenIsValid) => {
+        if(tokenIsValid){
+          try {
+            const stringData = await fileOps.read('users', phone)
+            const userData = helpers.parsedJSONToObject(stringData)
+            const hashedPassword = password ? helpers.hashPass(password) :userData.hashedPassword
+            delete data.payload.password
+            const newUserData = {...userData, ...data.payload, hashedPassword}
+            const updatingFile = await fileOps.update('users', phone, newUserData)
+          //   process.nextTick(() => {
+          //     delete newUserData.hashedPassword
+          //  })
+            callback(201, { newUserData })
+          }
+          catch(err) {
+            callback(400, {'Error': err })
+    
+          }
 
-      }
+        }
+        else {
+          callback(403, {'Error': 'Invalid or expired token. please provide a valid token'}) 
+        }
+      })
+      
    }
     else {
       callback(400, {'Error': 'Please enter some fields to update'})
@@ -101,19 +121,27 @@ UserService.put = async (data, callback) => {
  * @param { obj } data 
  * @param { func } callback 
  */
-UserService.delete = async (data, callback) => {
+UserService.delete = (data, callback) => {
   const { phone } = data.queryStringObject
+  const { token } = data.headers
 
-  const validationError = validate( { phone } , userSchema.phoneValidation)
+  const validationError = validate( { phone, token } , userSchema.get)
 
   if(!validationError) {
-    try {
-      const userDeletion = await fileOps.delete('users',phone)
-      callback(200, {'message': 'User successfully deleted'})
-    }
-    catch(err) {
-      callback(500, {'Error': err })
-    }
+    helpers.verifyToken(token, phone, async (tokenIsValid) => {
+      if(tokenIsValid){
+          try {
+            const userDeletion = await fileOps.delete('users',phone)
+            callback(200, {'message': 'User successfully deleted'})
+          }
+          catch(err) {
+            callback(500, {'Error': err })
+          }
+       }
+      else {
+        callback(403, {'Error': 'Invalid or expired token. please provide a valid token'}) 
+      }
+    })
   }
   else {
     callback(400, validationError)

@@ -45,12 +45,21 @@ userSchema.create = {
 /**
  * constraints for deleting and getting a user resource
  */
-userSchema.phoneValidation = {
+userSchema.get = {
   phone: {
     presence: true,
     format: {
       pattern: "^[0-9]{10}$",
       message: "Please phone number must be 10 digits"
+    }
+  },
+  token: {
+    presence: {
+      allowEmpty: false
+    },
+    format: {
+      pattern: "^[a-z0-9]{20}$",
+      message: "Invalid token. provide a valid token"
     }
   }
 }
@@ -86,6 +95,15 @@ userSchema.put = {
       minimum:3
     }
   },
+  token: {
+    presence: {
+      allowEmpty: false
+    },
+    format: {
+      pattern: "^[a-z0-9]{20}$",
+      message: "Invalid token. provide a valid token"
+    }
+  }
 
 }
 
