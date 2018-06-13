@@ -93,8 +93,9 @@ fileOps.read = (dir, file) => {
   return new Promise((resolve, reject) => {
     fs.readFile(`${fileOps.baseDir}${dir}/${file}.json`, 'utf8', (err, data) => {
       if(!err && data) {
-        const parsedData = helpers.parseJSONToObject(data)
-        resolve(parsedData)
+        // console.log(data)
+        // const parsedData = helpers.parsedJSONToObject(data)
+        resolve(data)
       }
       else {
         return reject('file does not exist')

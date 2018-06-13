@@ -55,7 +55,7 @@ const unifiedServer = (req, res) => {
       ...urlObject, 
       method,
       headers, 
-      'payload': helpers.parseJSONToObject(buffer)
+      'payload': helpers.parsedJSONToObject(buffer)
     }
 
     const chosenHandler = typeof(router[urlObject.trimmedPath]) != 'undefined' ? router[urlObject.trimmedPath] : handlers.notFound

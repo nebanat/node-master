@@ -1,7 +1,9 @@
 const crypto = require('crypto') 
 const config = require('../config')
+const fileOps = require('./data')
 
 let helpers = {}
+
 
 helpers.hashPass = (str) => {
   if(typeof(str) == 'string' && str.length > 0) {
@@ -33,7 +35,7 @@ helpers.createRandomString = (strLength) => {
   }
 }
 
-helpers.parseJSONToObject = (str) => {
+helpers.parsedJSONToObject = (str) => {
   try {
     const obj = JSON.parse(str)
     return obj
@@ -43,5 +45,21 @@ helpers.parseJSONToObject = (str) => {
   }
 }
 
+helpers.verifyToken = async (id, phone, callback) => {
+  try {
+    const stringData = await fileOps.read('tokens', id)
+    const tokenData = helpers.parsedJSONToObject(stringData)
+    if(tokenData.phone == phone && tokenData.expiresIn > Date.now()) {
+      callback(true)
+    }
+    else {
+      callback(false)
+    }
+  }
+  catch (err) {
+    console.log(err)
+    callback(false)
+  }
+}
 
 module.exports = helpers

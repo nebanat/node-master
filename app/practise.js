@@ -1,15 +1,18 @@
-const validate = require('validate.js')
-const userSchema = require('./schemas/userSchema')
+const helpers = require('./lib/helpers')
 
-const validateEmail = () => {
-  const userObject = {
-    firstName:'biliyok',
-    lastName: '',
-    phone: '',
-    password: 'a'
+const id = 'tnxtrjbbxx2ez81eiie5'
+const phone = '5557778956'
+
+const userObject = {id, phone}
+
+const stringData = JSON.stringify(userObject)
+
+// console.log(helpers.parsedJSONToObject(stringData))
+helpers.verifyToken(id, phone, (err, data) => {
+  if(!err) {
+    console.log(data)
   }
-  const result = validate(userObject, userSchema.create)
-  console.log(result)
-}
-
-validateEmail()
+  else {
+    console.error(err)
+  }
+})
