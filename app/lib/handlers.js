@@ -1,5 +1,6 @@
 const UserService = require('../services/UserService')
 const TokenService = require('../services/TokenService')
+const CheckService = require('../services/CheckService')
 
 let handlers = {}
 const acceptableMethods = ['post', 'get', 'put', 'delete']
@@ -45,6 +46,21 @@ handlers.users = (data, callback) => {
 handlers.tokens = (data, callback) => {
   if(acceptableMethods.indexOf(data.method) > -1) {
     TokenService[data.method](data, callback)
+  }
+  else {
+    callback(405, {'Error': 'http method not allowed'})
+  }
+
+}
+
+/**
+ * @description - creates handler for Checks resource 
+ * @param { json } data 
+ * @param { func } callback 
+ */
+handlers.checks = (data, callback) => {
+  if(acceptableMethods.indexOf(data.method) > -1) {
+    CheckService[data.method](data, callback)
   }
   else {
     callback(405, {'Error': 'http method not allowed'})

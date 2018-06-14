@@ -4,7 +4,8 @@ const router = {
   'ping': handlers.ping,
   'notFound': handlers.notFound,
   'users': handlers.users,
-  'tokens': handlers.tokens
+  'tokens': handlers.tokens,
+  'checks': handlers.checks
 }
 
 module.exports = router

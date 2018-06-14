@@ -18,7 +18,7 @@ UserService.post = async (data, callback) => {
     try {
         const hashedPassword = helpers.hashPass(password)
         delete data.payload.password
-        const user = {...data.payload, hashedPassword }
+        const user = {...data.payload, hashedPassword, checks:[] }
         const userCreation = await fileOps.create('users', phone, user )
         delete user.hashedPassword
         callback(200, { user })
@@ -117,6 +117,7 @@ UserService.put = async (data, callback) => {
   
 }
 /**
+ * Create a background task that will delete all checks associated with the user
  * @description - deletes a user resource
  * @param { obj } data 
  * @param { func } callback 
